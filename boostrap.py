@@ -19,23 +19,23 @@ import shutil
 import subprocess
 import sys
 import tarfile
-import tempfile
 import urllib.request
 
 environ_namespace = "TEST"
-
+message = "Installing virtualenv"
 packages = ["osourcer"]
-
-virtualenv_url = "https://pypi.python.org/packages/source/v/" \
-                 "virtualenv/virtualenv-1.8.4.tar.gz"
-
+virtualenv_version = "1.8.4"
 virtualenv_dir = "sandbox"
-
+cache_dir = "cache"
 run_module = "osourcer.tool"
 
 
 def get_base_dir():
     return os.path.dirname(os.path.abspath(__file__))
+
+
+def get_cache_dir():
+    return os.path.join(get_base_dir(), cache_dir)
 
 
 def get_virtualenv_dir():
@@ -50,21 +50,21 @@ def create_virtualenv():
     if os.path.exists(get_virtualenv_dir()):
         return
 
-    f = urllib.request.urlopen(virtualenv_url)
+    source_dir = os.path.join(get_cache_dir(),
+                              "virtualenv-%s" % virtualenv_version)
 
-    temp_dir = tempfile.mkdtemp()
+    if not os.path.exists(source_dir):
+        url = "https://pypi.python.org/packages/source/v/" \
+              "virtualenv/virtualenv-%s.tar.gz" % virtualenv_version
 
-    with tarfile.open(fileobj=f, mode="r:gz") as tar:
-        tar.extractall(temp_dir)
+        f = urllib.request.urlopen(url)
 
-    source_dir = os.path.join(temp_dir, os.listdir(temp_dir)[0])
+        with tarfile.open(fileobj=f, mode="r:gz") as tar:
+            tar.extractall(get_cache_dir())
 
-    try:
-        subprocess.check_call(["python3",
-                               os.path.join(source_dir, "virtualenv.py"),
-                               "-q", get_virtualenv_dir()])
-    finally:
-        shutil.rmtree(temp_dir)
+    subprocess.check_call(["python3",
+                           os.path.join(source_dir, "virtualenv.py"),
+                           "-q", get_virtualenv_dir()])
 
 
 def install_packages():
@@ -75,6 +75,10 @@ def install_packages():
 
 
 def main():
+    print(message)
+
+    os.environ["PIP_DOWNLOAD_CACHE"] = get_cache_dir()
+
     os.environ[environ_namespace + "_BASE_DIR"] = get_base_dir()
     os.environ[environ_namespace + "_VIRTUALENV"] = get_virtualenv_dir()
 

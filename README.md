@@ -10,6 +10,10 @@ running the specified python module.
 Copy the file into your project, then edit the value of the following variables
 at the top of it
 
+* message
+
+    A message to print before starting.
+
 * environ_namespace
 
     Namespace prepended to environment variables.
@@ -18,11 +22,14 @@ at the top of it
 
     A list of packages to install.
 
-* virtualenv_url
+* virtualenv_version
 
-    URL to the virtualenv source tarball.
+    The virtualenv version number.
 
 * virtualenv_dir
 
     Path of the virtualenv installation.
 
+* cache_dir
+
+    A directory where to cache downloads.
