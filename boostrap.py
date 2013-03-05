@@ -28,13 +28,25 @@ packages = []
 virtualenv_url = "https://pypi.python.org/packages/source/v/" \
                  "virtualenv/virtualenv-1.8.4.tar.gz"
 
-virtualenv_dir = os.path.join(os.path.dirname(__file__), "sandbox")
+virtualenv_dir = "sandbox"
 
 run_module = ""
 
 
+def get_base_dir():
+    return os.path.dirname(os.path.abspath(__file__))
+
+
+def get_virtualenv_dir():
+    return os.path.join(get_base_dir(), virtualenv_dir)
+
+
+def get_bin_path(name):
+    return os.path.join(get_virtualenv_dir(), "bin", name)
+
+
 def create_virtualenv():
-    if os.path.exists(virtualenv_dir):
+    if os.path.exists(get_virtualenv_dir()):
         return
 
     f = urllib.request.urlopen(virtualenv_url)
@@ -49,32 +61,30 @@ def create_virtualenv():
     try:
         subprocess.check_call(["python3",
                                os.path.join(source_dir, "virtualenv.py"),
-                               "-q", virtualenv_dir])
+                               "-q", get_virtualenv_dir()])
     finally:
         shutil.rmtree(temp_dir)
 
 
 def install_packages():
-    args = [os.path.join(virtualenv_dir, "bin", "pip"), "-q", "install"]
+    args = [get_bin_path("pip"), "-q", "install"]
     args.extend(packages)
 
     subprocess.check_call(args)
 
 
 def main():
-    base_dir = os.path.abspath(os.path.dirname(__file__))
-
-    os.environ[environ_namespace + "_DIR"] = base_dir
-    os.environ[environ_namespace + "_VIRTUALENV"] = virtualenv_dir
+    os.environ[environ_namespace + "_DIR"] = get_base_dir()
+    os.environ[environ_namespace + "_VIRTUALENV"] = get_virtualenv_dir()
 
     try:
         create_virtualenv()
         install_packages()
     except (subprocess.CalledProcessError, KeyboardInterrupt) as e:
-        shutil.rmtree(virtualenv_dir)
+        shutil.rmtree(get_virtualenv_dir())
         raise e
 
-    subprocess.check_call(["python3", "-m", run_module])
+    subprocess.check_call([get_bin_path("python3"), "-m", run_module])
 
 
 if __name__ == "__main__":
