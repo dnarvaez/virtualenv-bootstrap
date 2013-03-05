@@ -22,7 +22,7 @@ import tarfile
 import tempfile
 import urllib.request
 
-environ_namespace = "TEST_"
+environ_namespace = "TEST"
 
 packages = ["osourcer"]
 
