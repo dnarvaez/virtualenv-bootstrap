@@ -47,7 +47,7 @@ def create_virtualenv():
     try:
         subprocess.check_call(["python3",
                                os.path.join(source_dir, "virtualenv.py"),
-                               virtualenv_dir])
+                               "-q", virtualenv_dir])
     finally:
         shutil.rmtree(temp_dir)
 
