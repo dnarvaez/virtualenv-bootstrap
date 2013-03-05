@@ -17,20 +17,21 @@
 import os
 import shutil
 import subprocess
+import sys
 import tarfile
 import tempfile
 import urllib.request
 
-environ_namespace = ""
+environ_namespace = "TEST_"
 
-packages = []
+packages = ["osourcer"]
 
 virtualenv_url = "https://pypi.python.org/packages/source/v/" \
                  "virtualenv/virtualenv-1.8.4.tar.gz"
 
 virtualenv_dir = "sandbox"
 
-run_module = ""
+run_module = "osourcer.tool"
 
 
 def get_base_dir():
@@ -84,7 +85,11 @@ def main():
         shutil.rmtree(get_virtualenv_dir())
         raise e
 
-    subprocess.check_call([get_bin_path("python3"), "-m", run_module])
+    args = [get_bin_path("python3"), "-m", run_module]
+    if len(sys.argv) > 1:
+        args.extend(sys.argv[1:])
+
+    subprocess.check_call(args)
 
 
 if __name__ == "__main__":
