@@ -75,7 +75,7 @@ def install_packages():
 
 
 def main():
-    os.environ[environ_namespace + "_DIR"] = get_base_dir()
+    os.environ[environ_namespace + "_BASE_DIR"] = get_base_dir()
     os.environ[environ_namespace + "_VIRTUALENV"] = get_virtualenv_dir()
 
     try:
