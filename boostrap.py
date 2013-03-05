@@ -21,6 +21,8 @@ import tarfile
 import tempfile
 import urllib.request
 
+environ_namespace = ""
+
 packages = []
 
 virtualenv_url = "https://pypi.python.org/packages/source/v/" \
@@ -60,6 +62,11 @@ def install_packages():
 
 
 def main():
+    base_dir = os.path.abspath(os.path.dirname(__file__))
+
+    os.environ[environ_namespace + "_DIR"] = base_dir
+    os.environ[environ_namespace + "_VIRTUALENV"] = virtualenv_dir
+
     try:
         create_virtualenv()
         install_packages()

@@ -10,6 +10,10 @@ running the specified python module.
 Copy the file into your project, then edit the value of the following variables
 at the top of it
 
+* environ_namespace
+
+    Namespace prepended to environment variables.
+
 * packages
 
     A list of packages to install.
