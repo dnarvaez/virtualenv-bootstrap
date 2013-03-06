@@ -33,3 +33,8 @@ at the top of it
 * cache_dir
 
     A directory where to cache downloads.
+
+* etag
+
+    Opaque identifier of the virtualenv content. Change it whenever a
+    library or virtualenv itself needs to be updated.

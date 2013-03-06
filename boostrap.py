@@ -28,6 +28,7 @@ virtualenv_version = "1.8.4"
 virtualenv_dir = "sandbox"
 cache_dir = "cache"
 run_module = "osourcer.tool"
+etag = "1"
 
 
 def get_base_dir():
@@ -42,14 +43,15 @@ def get_virtualenv_dir():
     return os.path.join(get_base_dir(), virtualenv_dir)
 
 
+def get_stamp_path():
+    return get_virtualenv_dir() + ".stamp"
+
+
 def get_bin_path(name):
     return os.path.join(get_virtualenv_dir(), "bin", name)
 
 
 def create_virtualenv():
-    if os.path.exists(get_virtualenv_dir()):
-        return
-
     source_dir = os.path.join(get_cache_dir(),
                               "virtualenv-%s" % virtualenv_version)
 
@@ -74,20 +76,39 @@ def install_packages():
     subprocess.check_call(args)
 
 
-def main():
-    print(message)
+def check_stamp():
+    try:
+        with open(get_stamp_path()) as f:
+            stamp = f.read()
+    except IOError:
+        stamp = None
 
+    return stamp == etag
+
+
+def write_stamp():
+    with open(get_stamp_path(), "w") as f:
+        f.write(etag)
+
+
+def main():
     os.environ["PIP_DOWNLOAD_CACHE"] = get_cache_dir()
 
     os.environ[environ_namespace + "_BASE_DIR"] = get_base_dir()
     os.environ[environ_namespace + "_VIRTUALENV"] = get_virtualenv_dir()
 
-    try:
+    if not check_stamp():
+        print(message)
+
+        try:
+            shutil.rmtree(get_virtualenv_dir())
+        except OSError:
+            pass
+
         create_virtualenv()
         install_packages()
-    except (subprocess.CalledProcessError, KeyboardInterrupt) as e:
-        shutil.rmtree(get_virtualenv_dir())
-        raise e
+
+        write_stamp()
 
     args = [get_bin_path("python3"), "-m", run_module]
     if len(sys.argv) > 1:
