@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# This script is from https://github.com/dnarvaez/virtualenv-bootstrap
+
 import os
 import shutil
 import subprocess
