@@ -22,7 +22,8 @@ import tarfile
 import urllib.request
 
 environ_namespace = "TEST"
-message = "Installing virtualenv"
+start_message = "Installing virtualenv"
+end_message = "\n"
 packages = ["osourcer"]
 virtualenv_version = "1.8.4"
 virtualenv_dir = "sandbox"
@@ -98,7 +99,7 @@ def main():
     os.environ[environ_namespace + "_VIRTUALENV"] = get_virtualenv_dir()
 
     if not check_stamp():
-        print(message)
+        print(start_message)
 
         try:
             shutil.rmtree(get_virtualenv_dir())
@@ -109,6 +110,8 @@ def main():
         install_packages()
 
         write_stamp()
+
+        print(end_message)
 
     args = [get_bin_path("python3"), "-m", run_module]
     if len(sys.argv) > 1:

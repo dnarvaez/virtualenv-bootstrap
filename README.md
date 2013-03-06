@@ -10,9 +10,13 @@ running the specified python module.
 Copy the file into your project, then edit the value of the following variables
 at the top of it
 
-* message
+* start_message
 
-    A message to print before starting.
+    A message to print when starting to build.
+
+* end_message
+
+    A message to print when finishing to build.
 
 * environ_namespace
 
