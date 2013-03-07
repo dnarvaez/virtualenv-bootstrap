@@ -119,7 +119,7 @@ def main():
     if len(sys.argv) > 1:
         args.extend(sys.argv[1:])
 
-    subprocess.check_call(args)
+    os.execl(args[0], *args)
 
 
 if __name__ == "__main__":
