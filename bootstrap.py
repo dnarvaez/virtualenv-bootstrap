@@ -23,6 +23,7 @@ import sys
 import tarfile
 import urllib.request
 
+base_dir = os.path.dirname(os.path.abspath(__file__))
 environ_namespace = "TEST"
 start_message = "Installing virtualenv"
 end_message = "\n"
@@ -33,17 +34,16 @@ cache_dir = "cache"
 run_module = "osourcer.tool"
 etag = "1"
 
-
-def get_base_dir():
-    return os.path.dirname(os.path.abspath(__file__))
+virtualenv_dir = os.path.join("build", "eta",
+                              os.environ.get("ETA_VIRTUALENV_NAME", "sandbox"))
 
 
 def get_cache_dir():
-    return os.path.join(get_base_dir(), cache_dir)
+    return os.path.join(base_dir, cache_dir)
 
 
 def get_virtualenv_dir():
-    return os.path.join(get_base_dir(), virtualenv_dir)
+    return os.path.join(base_dir, virtualenv_dir)
 
 
 def get_stamp_path():
@@ -97,7 +97,7 @@ def write_stamp():
 def main():
     os.environ["PIP_DOWNLOAD_CACHE"] = get_cache_dir()
 
-    os.environ[environ_namespace + "_BASE_DIR"] = get_base_dir()
+    os.environ[environ_namespace + "_BASE_DIR"] = base_dir
     os.environ[environ_namespace + "_VIRTUALENV"] = get_virtualenv_dir()
 
     if not check_stamp():
