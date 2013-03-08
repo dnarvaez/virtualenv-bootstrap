@@ -28,14 +28,12 @@ environ_namespace = "TEST"
 start_message = "Installing virtualenv"
 end_message = "\n"
 packages = ["osourcer"]
+submodules = []
 virtualenv_version = "1.8.4"
 virtualenv_dir = "sandbox"
 cache_dir = "cache"
 run_module = "osourcer.tool"
 etag = "1"
-
-virtualenv_dir = os.path.join("build", "eta",
-                              os.environ.get("ETA_VIRTUALENV_NAME", "sandbox"))
 
 
 def get_cache_dir():
@@ -94,6 +92,13 @@ def write_stamp():
         f.write(etag)
 
 
+def update_submodules():
+    os.chdir(base_dir)
+    for module in submodules:
+        subprocess.check_call(["git", "submodule", "update", "--init",
+                               module])
+
+
 def main():
     os.environ["PIP_DOWNLOAD_CACHE"] = get_cache_dir()
 
@@ -102,6 +107,8 @@ def main():
 
     if not check_stamp():
         print(start_message)
+
+        update_submodules()
 
         try:
             shutil.rmtree(get_virtualenv_dir())
