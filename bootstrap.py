@@ -108,7 +108,8 @@ def main():
     if not check_stamp():
         print(start_message)
 
-        update_submodules()
+        if (environ_namespace + "_SKIP_SUBMODULES") not in os.environ:
+            update_submodules()
 
         try:
             shutil.rmtree(get_virtualenv_dir())
