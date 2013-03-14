@@ -85,7 +85,7 @@ def install_packages():
 
 
 def upgrade_submodules():
-    args = [get_bin_path("pip"), "install", "--no-deps", "--upgrade"]
+    args = [get_bin_path("pip"), "-q", "install", "--no-deps", "--upgrade"]
     args.extend(get_submodule_dirs())
 
     subprocess.check_call(args)
