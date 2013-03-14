@@ -16,6 +16,8 @@
 
 # This script is from https://github.com/dnarvaez/virtualenv-bootstrap
 
+import hashlib
+import json
 import os
 import shutil
 import subprocess
@@ -70,29 +72,62 @@ def create_virtualenv():
                            "-q", get_virtualenv_dir()])
 
 
+def get_submodule_dirs():
+    return [os.path.join(base_dir, submodule) for submodule in submodules]
+
+
 def install_packages():
     args = [get_bin_path("pip"), "-q", "install"]
     args.extend(packages)
+    args.extend(get_submodule_dirs())
 
     subprocess.check_call(args)
+
+
+def upgrade_submodules():
+    args = [get_bin_path("pip"), "install", "--no-deps", "--upgrade"]
+    args.extend(get_submodule_dirs())
+
+    subprocess.check_call(args)
+
+
+def compute_submodules_hash():
+    data = ""
+
+    for submodule in submodules:
+        for root, dirs, files in os.walk(os.path.join(base_dir, submodule)):
+            for name in files:
+                path = os.path.join(root, name)
+                mtime = os.lstat(path).st_mtime
+                data = "%s%s %s\n" % (data, mtime, path)
+
+    return hashlib.sha256(data.encode("utf-8")).hexdigest()
 
 
 def check_stamp():
     try:
         with open(get_stamp_path()) as f:
-            stamp = f.read()
-    except IOError:
-        stamp = None
+            stamp = json.load(f)
+    except (IOError, ValueError):
+        return True, True
 
-    return stamp == etag
+    return (stamp["etag"] != etag,
+            stamp["submodules_hash"] != compute_submodules_hash())
 
 
 def write_stamp():
+    stamp = {"etag": etag,
+             "submodules_hash": compute_submodules_hash()}
+
     with open(get_stamp_path(), "w") as f:
-        f.write(etag)
+        json.dump(stamp, f)
 
 
 def update_submodules():
+    update = os.environ.get(environ_namespace + "_UPDATE_SUBMODULES", "yes")
+    if update != "yes":
+        return
+
     os.chdir(base_dir)
     for module in submodules:
         subprocess.check_call(["git", "submodule", "update", "--init",
@@ -105,11 +140,12 @@ def main():
     os.environ[environ_namespace + "_BASE_DIR"] = base_dir
     os.environ[environ_namespace + "_VIRTUALENV"] = get_virtualenv_dir()
 
-    if not check_stamp():
+    etag_changed, submodules_changed = check_stamp()
+
+    if etag_changed:
         print(start_message)
 
-        if (environ_namespace + "_SKIP_SUBMODULES") not in os.environ:
-            update_submodules()
+        update_submodules()
 
         try:
             shutil.rmtree(get_virtualenv_dir())
@@ -122,6 +158,9 @@ def main():
         write_stamp()
 
         print(end_message)
+    elif submodules_changed:
+        upgrade_submodules()
+        write_stamp()
 
     args = [get_bin_path("python3"), "-m", run_module]
     if len(sys.argv) > 1:
